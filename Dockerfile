@@ -8,4 +8,4 @@ RUN chmod +x gradlew
 
 RUN ./gradlew build --no-daemon
 
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8098} -jar build/libs/*.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8098} -jar $(ls build/libs/*.jar | grep -v plain)"]
