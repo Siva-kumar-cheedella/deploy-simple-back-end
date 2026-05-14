@@ -43,11 +43,11 @@ public class AuthController {
             if (user.getPassword().equals(password)) {
 
                 log.info("Authentication successful for email: {}", email);
-                emailService.sendEmail(
-                        email,
-                        "Authentication Successful",
-                        "You have successfully authenticated with our premium services."
-                );
+
+                String subject = "Login Notification";
+                String htmlBody = "<h1>Hello!</h1><p>You have successfully logged into your account.</p>";
+                emailService.sendEmail(email, subject, htmlBody);
+                
                 return ResponseEntity.ok(
                         "Authentication Successful"
                 );
