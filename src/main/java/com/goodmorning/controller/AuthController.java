@@ -2,6 +2,7 @@ package com.goodmorning.controller;
 
 import com.goodmorning.entity.User;
 import com.goodmorning.repository.UserRepository;
+import com.goodmorning.service.EmailService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +19,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/auth")
     public ResponseEntity<String> authenticate(
@@ -39,7 +43,11 @@ public class AuthController {
             if (user.getPassword().equals(password)) {
 
                 log.info("Authentication successful for email: {}", email);
-
+                emailService.sendEmail(
+                        email,
+                        "Authentication Successful",
+                        "You have successfully authenticated with our premium services."
+                );
                 return ResponseEntity.ok(
                         "Authentication Successful"
                 );
