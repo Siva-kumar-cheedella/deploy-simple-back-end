@@ -3,10 +3,12 @@ package com.cleanlearn.controller;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.cleanlearn.entity.User;
+import com.cleanlearn.security.JwtUtils;
 import com.cleanlearn.repository.UserRepository;
 import com.cleanlearn.service.EmailService;
 
@@ -23,6 +25,9 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @GetMapping("/auth")
     public ResponseEntity<String> authenticate(
             @RequestParam String email,
@@ -31,8 +36,7 @@ public class AuthController {
 
         log.debug("Authentication request received for email: {}", email);
 
-        Optional<User> optionalUser =
-                userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
 
@@ -48,9 +52,14 @@ public class AuthController {
                 String htmlBody = "<h1>Hello!</h1><p>You have successfully logged into your account.</p>";
                 emailService.sendEmail(email, subject, htmlBody);
                 
-                return ResponseEntity.ok(
-                        "Authentication Successful"
-                );
+                String token = jwtUtils.generateToken(email);
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", "Bearer " + token);
+
+                return ResponseEntity.ok()
+                                    .headers(headers)
+                                    .body("Login successful");
+
             }
         }
 
@@ -59,5 +68,10 @@ public class AuthController {
         return ResponseEntity
                 .badRequest()
                 .body("Invalid Email or Password");
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<String> getDetails() {
+        return ResponseEntity.ok("Protected details");
     }
 }

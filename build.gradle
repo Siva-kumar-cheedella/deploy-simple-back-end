@@ -36,9 +36,9 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // // JWT
-    // implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
-    // runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
-    // runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
