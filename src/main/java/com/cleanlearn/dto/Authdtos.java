@@ -1,3 +1,4 @@
+package com.cleanlearn.dto;
 // package com.goodmorning.dto;
 
 // import jakarta.validation.constraints.Email;

@@ -1,4 +1,4 @@
-package com.goodmorning.entity;
+package com.cleanlearn.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

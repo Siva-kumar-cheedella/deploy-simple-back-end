@@ -1,8 +1,9 @@
-package com.goodmorning.repository;
+package com.cleanlearn.repository;
 
-import com.goodmorning.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.cleanlearn.entity.User;
 
 import java.util.Optional;
 

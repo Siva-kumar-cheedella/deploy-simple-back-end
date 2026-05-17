@@ -1,14 +1,14 @@
-package com.goodmorning.controller;
-
-import com.goodmorning.entity.User;
-import com.goodmorning.repository.UserRepository;
-import com.goodmorning.service.EmailService;
+package com.cleanlearn.controller;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.cleanlearn.entity.User;
+import com.cleanlearn.repository.UserRepository;
+import com.cleanlearn.service.EmailService;
 
 import java.util.Optional;
 

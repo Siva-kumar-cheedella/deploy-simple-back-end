@@ -1,4 +1,4 @@
-package com.goodmorning.config;
+package com.cleanlearn.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
