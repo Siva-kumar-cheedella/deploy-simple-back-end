@@ -17,7 +17,7 @@ public class EmailService {
         Resend resend = new Resend(resendApiKey);
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-            .from("onboarding@resend.dev") // Use this for testing
+            .from("no-reply@cleanlearn.in") // Use this for testing
             .to(to)
             .subject(subject)
             .html(htmlContent)
