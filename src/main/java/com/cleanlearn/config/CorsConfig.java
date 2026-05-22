@@ -1,4 +1,4 @@
-package com.goodmorning.config;
+package com.cleanlearn.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +16,12 @@ public class CorsConfig {
         CorsConfiguration config =
                 new CorsConfiguration();
 
-        config.addAllowedOrigin("*");
-
         config.addAllowedHeader("*");
 
         config.addAllowedMethod("*");
-
+        config.addAllowedOrigin("https://cleanlearn.netlify.app");
         config.setAllowCredentials(false);
+	config.addExposedHeader("Authorization");
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

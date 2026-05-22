@@ -1,4 +1,4 @@
-package com.goodmorning.service;
+package com.cleanlearn.service;
 
 import com.resend.*;
 import com.resend.core.exception.ResendException;

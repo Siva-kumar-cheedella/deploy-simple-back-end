@@ -1,4 +1,4 @@
-package com.goodmorning.config;
+package com.cleanlearn.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.goodmorning.repository")
+@EnableJpaRepositories(basePackages = "com.cleanlearn.repository")
 public class DataSourceConfig {
 
     @Value("${spring.datasource.url}")
@@ -60,7 +60,7 @@ public class DataSourceConfig {
 
         return builder
                 .dataSource(dataSource)
-                .packages("com.goodmorning.entity")
+                .packages("com.cleanlearn.entity")
                 .persistenceUnit("default")
                 .build();
     }
