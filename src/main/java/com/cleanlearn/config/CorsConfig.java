@@ -21,6 +21,7 @@ public class CorsConfig {
         config.addAllowedMethod("*");
         config.addAllowedOrigin("https://cleanlearn.netlify.app");
         config.setAllowCredentials(false);
+	config.addExposedHeader("Authorization");
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
