@@ -50,7 +50,7 @@ public class AuthController {
 
                 String subject = "Login Notification";
                 String htmlBody = "<h1>Hello!</h1><p>You have successfully logged into your account.</p>";
-                emailService.sendEmail(email, subject, htmlBody);
+                // emailService.sendEmail(email, subject, htmlBody);
                 
                 String token = jwtUtils.generateToken(email);
                 HttpHeaders headers = new HttpHeaders();

@@ -1,4 +1,11 @@
 {
     "java.compile.nullAnalysis.mode": "disabled",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "vsintellicode.java.completionsEnabled": true,
+    "java.jdt.ls.vmargs": "-Xms256m -Xmx1G",
+    "files.watcherExclude": {
+    "**/target/**": true,
+    "**/.gradle/**": true,
+    "**/build/**": true
+  },
 }
