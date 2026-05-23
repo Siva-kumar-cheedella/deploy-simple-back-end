@@ -18,12 +18,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+import com.cleanlearn.config.AppConfig;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
+    private final AppConfig appConfig;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -44,10 +47,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try{
 
-            if (token != null && jwtUtils.validateToken(token)) {
+            log.error("Token validation enabled: {}", appConfig.isTokenValidationEnabled());
+            
+            if(!appConfig.isTokenValidationEnabled()) {
+                UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                    null, null, Collections.emptyList() // No authorities for simplicity
+                );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }else if (token != null && jwtUtils.validateToken(token)) {
                 String email = jwtUtils.getEmailFromToken(token);
-                // UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                
+
                 UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(
                     email, null, Collections.emptyList() // No authorities for simplicity
