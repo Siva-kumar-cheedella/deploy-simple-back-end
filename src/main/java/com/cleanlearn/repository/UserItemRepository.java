@@ -11,5 +11,8 @@ import java.util.List;
 @Repository
 public interface UserItemRepository extends JpaRepository<UserItem, Long> {
 
-    List<UserItem> findByUserId(Long userId);
+    List<UserItem> findByUserIdAndStatus(Long userId, String status);
+
+    Boolean existsByUserIdAndRefId(Long userId, Long refId);
+
 }

@@ -43,9 +43,4 @@ public class UserController {
         }
     }
 
-    @GetMapping("/user/items")
-    public ResponseEntity<List<UserItem>> getItems(@RequestParam Long userId) {
-        return ResponseEntity.ok(userItemService.getItems(userId));
-    }
-
 }

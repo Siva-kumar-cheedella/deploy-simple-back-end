@@ -54,6 +54,9 @@ public class UserItem {
     @Column(name = "\"R2_Note_Id\"")
     private Long r2NoteId;
 
+    @Column(name = "\"status\"")
+    private String status;
+
     @Column(name = "\"createdBy\"")
     private String createdBy;
 
