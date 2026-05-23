@@ -8,6 +8,8 @@ import java.util.List;
 import com.cleanlearn.entity.Problem;
 import com.cleanlearn.repository.ProblemRepository;
 import com.cleanlearn.entity.User;
+import com.cleanlearn.repository.UserRepository;
+import com.cleanlearn.dto.UserItemProblemDto;
 
 @Service
 @RequiredArgsConstructor
@@ -17,11 +19,11 @@ public class UserItemService {
     private final UserService userService;
     private final ProblemRepository problemRepository;
 
-    public List<UserItem> getItems(Long userId) {
-        return userItemRepository.findByUserIdAndStatus(userId, "A");
+    public List<UserItemProblemDto> getItems(Long userId) {
+        return userItemRepository.findByUserIdWithStatus(userId);
     }
 
-    public List<UserItem> addDsaSheetToUser(Long userId, Long sheetId) throws Exception {
+    public List<UserItemProblemDto> addDsaSheetToUser(Long userId, Long sheetId) throws Exception {
 
         User user = userService.validateUserById(userId);
 

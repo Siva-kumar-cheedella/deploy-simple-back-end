@@ -13,6 +13,7 @@ import com.cleanlearn.service.UserItemService;
 import com.cleanlearn.entity.UserItem;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.cleanlearn.dto.UserItemProblemDto;
 
 
 @RestController
@@ -26,7 +27,7 @@ public class UserItemController {
     public ResponseEntity<Object> addDsaSheetToUser(@PathVariable Long userId, @PathVariable Long sheetId) {
         
         try {
-            List<UserItem> problems = userItemService.addDsaSheetToUser(userId, sheetId);
+            List<UserItemProblemDto> problems = userItemService.addDsaSheetToUser(userId, sheetId);
             return ResponseEntity.ok(problems);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add DSA sheet to user: " + e.getMessage());
@@ -35,7 +36,7 @@ public class UserItemController {
     }
 
     @GetMapping("/user/items")
-    public ResponseEntity<List<UserItem>> getItems(@RequestParam Long userId) {
+    public ResponseEntity<List<UserItemProblemDto>> getItems(@RequestParam Long userId) {
         return ResponseEntity.ok(userItemService.getItems(userId));
     }
 
