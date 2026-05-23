@@ -29,7 +29,7 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @GetMapping("/auth")
-    public ResponseEntity<String> authenticate(
+    public ResponseEntity<Object> authenticate(
             @RequestParam String email,
             @RequestParam String password
     ) {
@@ -58,7 +58,7 @@ public class AuthController {
 
                 return ResponseEntity.ok()
                                     .headers(headers)
-                                    .body("Login successful");
+                                    .body(user);
 
             }
         }
@@ -71,7 +71,7 @@ public class AuthController {
     }
 
     @GetMapping("/details")
-    public ResponseEntity<String> getDetails() {
+    public ResponseEntity<Object> getDetails() {
         return ResponseEntity.ok("Protected details");
     }
 }
