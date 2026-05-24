@@ -10,14 +10,23 @@ import com.cleanlearn.repository.ProblemRepository;
 import com.cleanlearn.entity.User;
 import com.cleanlearn.repository.UserRepository;
 import com.cleanlearn.dto.UserItemProblemDto;
+import java.time.LocalDateTime;
+import lombok.extern.slf4j.Slf4j;
+import com.cleanlearn.dto.MarkAsDoneDto;
+import com.cleanlearn.util.constants;
+import com.cleanlearn.service.NotesService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@Transactional(rollbackFor = Exception.class)
 public class UserItemService {
 
     private final UserItemRepository userItemRepository;
     private final UserService userService;
     private final ProblemRepository problemRepository;
+    private final NotesService notesService;
 
     public List<UserItemProblemDto> getItems(Long userId) {
         return userItemRepository.findByUserIdWithStatus(userId);
@@ -54,5 +63,83 @@ public class UserItemService {
 
         return getItems(userId);
 
+    }
+
+    public List<UserItemProblemDto> markAsDone(MarkAsDoneDto markAsDoneDto) throws Exception {
+        
+        userService.validateUserById(markAsDoneDto.getUserId());
+
+        UserItem userItem = userItemRepository.findByUserIdAndItemId(markAsDoneDto.getUserId(), markAsDoneDto.getItemId())
+            .orElseThrow(() -> new Exception("User item not found with id: " + markAsDoneDto.getItemId() + " for user with id: " + markAsDoneDto.getUserId()));
+
+        
+        if(markAsDoneDto.getNotes() == null || markAsDoneDto.getNotes().isEmpty()) {
+            throw new Exception("Notes cannot be empty when marking an item as done");
+        }
+        
+        log.debug("Marking item with id: {} as done for user with id: {}", markAsDoneDto.getItemId(), markAsDoneDto.getUserId());
+
+        switch (markAsDoneDto.getRevision()) {
+            case constants.FIRST_ATTEMPT:
+                markFirstAttemptAsDone(userItem, markAsDoneDto.getUserName(), markAsDoneDto.getNotes());
+                break;
+            case constants.REVISION_1:
+                markR1AsDone(userItem, markAsDoneDto.getUserName(), markAsDoneDto.getNotes());
+                break;
+            case constants.REVISION_2:
+                markR2AsDone(userItem, markAsDoneDto.getUserName(), markAsDoneDto.getNotes());
+                break;
+            default:
+                throw new Exception("Invalid revision type: " + markAsDoneDto.getRevision());
+        }
+
+        return getItems(markAsDoneDto.getUserId());
+
+    }
+
+    private void markFirstAttemptAsDone(UserItem userItem, String userName, String notes) throws Exception {
+        
+        Long noteId = notesService.saveNotes(notes, userItem.getUserId(), userName);
+
+        userItem.setFaDate(LocalDateTime.now());
+        userItem.setFaStatus(constants.COMPLETED_STATUS);
+        userItem.setFaNoteId(noteId);
+
+        userItem.setUpdatedBy(userName);
+        userItem.setUpdatedDate(LocalDateTime.now());
+
+        userItem.setR1Date(LocalDateTime.now().plusDays(3)); 
+
+        userItemRepository.save(userItem);
+    }
+
+    private void markR1AsDone(UserItem userItem, String userName, String notes) throws Exception {
+        
+        Long noteId = notesService.saveNotes(notes, userItem.getUserId(), userName);
+
+        userItem.setR1Date(LocalDateTime.now());
+        userItem.setR1Status(constants.COMPLETED_STATUS);
+        userItem.setR1NoteId(noteId);
+
+        userItem.setUpdatedBy(userName);
+        userItem.setUpdatedDate(LocalDateTime.now());
+
+        userItem.setR2Date(LocalDateTime.now().plusDays(7));
+
+        userItemRepository.save(userItem);
+    }
+
+    private void markR2AsDone(UserItem userItem, String userName, String notes) throws Exception {
+        
+        Long noteId = notesService.saveNotes(notes, userItem.getUserId(), userName);
+
+        userItem.setR2Date(LocalDateTime.now());
+        userItem.setR2Status(constants.COMPLETED_STATUS);
+        userItem.setR2NoteId(noteId);
+
+        userItem.setUpdatedBy(userName);
+        userItem.setUpdatedDate(LocalDateTime.now());
+
+        userItemRepository.save(userItem);
     }
 }

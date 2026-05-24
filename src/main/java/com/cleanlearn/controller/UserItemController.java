@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.cleanlearn.entity.UserItem;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.cleanlearn.dto.UserItemProblemDto;
+import com.cleanlearn.dto.MarkAsDoneDto;
 
 
 @RestController
@@ -35,9 +37,18 @@ public class UserItemController {
 
     }
 
-    @GetMapping("/user/items")
-    public ResponseEntity<List<UserItemProblemDto>> getItems(@RequestParam Long userId) {
+    @GetMapping("/user/{userId}/items")
+    public ResponseEntity<List<UserItemProblemDto>> getItems(@PathVariable Long userId) {
         return ResponseEntity.ok(userItemService.getItems(userId));
     }
 
+    @PostMapping("/user/{userId}/items/{itemId}/markAsDone")
+    public ResponseEntity<Object> markAsDone(@PathVariable Long userId, @PathVariable Long itemId, @RequestBody MarkAsDoneDto markAsDoneDto) {
+        try {
+            List<UserItemProblemDto> problems = userItemService.markAsDone(markAsDoneDto);
+            return ResponseEntity.ok(problems);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to mark item as done: " + e.getMessage());
+        }
+    }
 }
