@@ -16,6 +16,7 @@ import com.cleanlearn.dto.MarkAsDoneDto;
 import com.cleanlearn.util.constants;
 import com.cleanlearn.service.NotesService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -141,5 +142,10 @@ public class UserItemService {
         userItem.setUpdatedDate(LocalDateTime.now());
 
         userItemRepository.save(userItem);
+    }
+
+    // ========================GROQ RELATED METHODS - IGNORE =========================
+    public List<UserItemProblemDto> getUserItemsForGroq(Long userId) {
+        return userItemRepository.fetchRecentUserItems(userId, PageRequest.of(0, 10));
     }
 }

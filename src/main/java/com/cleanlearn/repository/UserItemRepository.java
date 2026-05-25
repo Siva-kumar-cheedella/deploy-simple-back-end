@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.List;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface UserItemRepository extends JpaRepository<UserItem, Long> {
@@ -21,5 +22,10 @@ public interface UserItemRepository extends JpaRepository<UserItem, Long> {
     Boolean existsByUserIdAndRefId(Long userId, Long refId);
 
     Optional<UserItem> findByUserIdAndItemId(Long userId, Long itemId);
+
+    @Query("SELECT new com.cleanlearn.dto.UserItemProblemDto(ui, p) " +
+            "FROM UserItem ui LEFT JOIN Problem p ON ui.refId = p.problemId " +
+            "WHERE ui.userId = :userId AND ui.itemType = 'DSA' ORDER BY ui.faDate DESC NULLS LAST")
+    List<UserItemProblemDto> fetchRecentUserItems(@Param("userId") Long userId,Pageable pageable);
 
 }
