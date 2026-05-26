@@ -1,33 +1,54 @@
 package com.cleanlearn.service;
 
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.cleanlearn.service.EmailService;
+
 import com.cleanlearn.dto.GroqResponseParser.*;
+import com.cleanlearn.service.EmailService;
+import com.cleanlearn.service.UserService;
+import com.cleanlearn.entity.User;
+import com.cleanlearn.service.UserItemService;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class ReportGenerationService {
 
     @Autowired
     private EmailService emailService;
 
-    public void generateAndSendEmailReport(String to, StudyPlanResponse plan) {
-        
-        to="ksiva7393@gmail.com";
+    @Autowired
+    private UserItemService userItemService;
+
+    @Autowired
+    private UserService userService;
+
+    public void generateAndSendEmailReport(StudyPlanResponse plan, Long userId) throws Exception {
+
+        updateFaDateForGroqProblems(plan.recommendedProblems(), userId);
 
         String subject = "Your Daily Study Plan - " + java.time.LocalDate.now();
-        String htmlContent = generateEmailContent(plan);
+
+        User user = userService.validateUserById(userId);
+        String to = user.getEmail();
+
+        List<String> revisionProblems = userItemService.getPendingRevisionsForToday(userId);
+    
+        String htmlContent = generateEmailContent(plan, revisionProblems);
         
         emailService.sendEmail(to, subject, htmlContent);
     }
 
-    public String generateEmailContent(StudyPlanResponse plan) {
+    private void updateFaDateForGroqProblems(List<RecommendedProblem> recommendedProblems, Long userId) {
+        for (RecommendedProblem prob : recommendedProblems) {
+            userItemService.updateFaDateForProblem(userId, prob.id());
+        }
+    }
+
+    public String generateEmailContent(StudyPlanResponse plan, List<String> revisionProblems) {
         return """
             <!DOCTYPE html>
             <html lang="en">
@@ -41,6 +62,11 @@ public class ReportGenerationService {
                     .header h1 { margin: 0; color: #2b6cb0; font-size: 24px; }
                     .section-card { background: #ebf8fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
                     .section-card h2 { margin-top: 0; color: #2b6cb0; font-size: 18px; }
+                    
+                    /* Styling for the Pending Revisions Section */
+                    .revision-card { background: #fdf6e3; padding: 20px; border-radius: 8px; border-left: 4px solid #d97706; margin-bottom: 25px; }
+                    .revision-card h2 { margin-top: 0; color: #b45309; font-size: 18px; }
+                    
                     .problem-card { border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #4299e1; background: #fafafa; }
                     .problem-card h3 { margin-top: 0; font-size: 18px; margin-bottom: 10px; }
                     .badge { display: inline-block; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 15px; background: #edf2f7; color: #4a5568; margin-right: 5px; margin-bottom: 5px; }
@@ -65,6 +91,11 @@ public class ReportGenerationService {
                         <p><strong>Primary Goal:</strong> %s</p>
                         <p><strong>Secondary Goal:</strong> %s</p>
                         <p><strong>Strategy:</strong> %s</p>
+                    </div>
+
+                    <div class="revision-card">
+                        <h2>🔄 Pending Revisions Today</h2>
+                        %s
                     </div>
 
                     <div>
@@ -105,6 +136,7 @@ public class ReportGenerationService {
                 plan.todayFocus().primaryGoal(),
                 plan.todayFocus().secondaryGoal(),
                 plan.todayFocus().strategySummary(),
+                buildRevisionHtml(revisionProblems),
                 buildProblemsHtml(plan.recommendedProblems()),
                 buildListItems(plan.sequenceReasoning().whyOnlyThese()),
                 String.join(", ", plan.avoidToday().topicsToAvoid()),
@@ -113,7 +145,15 @@ public class ReportGenerationService {
             );
     }
 
-    // --- Helper Methods to generate dynamic lists ---
+    // --- Helper Methods ---
+
+    private static String buildRevisionHtml(List<String> revisionProblems) {
+        // Safe check to ensure we don't render an empty unordered list
+        if (revisionProblems == null || revisionProblems.isEmpty()) {
+            return "<p style=\"color: #b45309; font-weight: 600; margin-bottom: 0;\">🎉 All caught up! No pending revisions for today.</p>";
+        }
+        return "<ul class=\"list-unstyled\" style=\"margin-bottom: 0;\">\n" + buildListItems(revisionProblems) + "\n</ul>";
+    }
 
     private static String buildProblemsHtml(List<RecommendedProblem> problems) {
         StringBuilder html = new StringBuilder();
@@ -147,6 +187,7 @@ public class ReportGenerationService {
     }
 
     private static String buildListItems(List<String> items) {
+        if (items == null) return "";
         return items.stream()
             .map(item -> "<li>" + item + "</li>")
             .collect(Collectors.joining("\n"));

@@ -17,9 +17,9 @@ public class DailyReportController {
     private GroqService groqService;
 
     @GetMapping("/generate")
-    public String generateDailyReport() {
-        StudyPlanResponse studyPlan = groqService.askGroq();
-        reportGenerationService.generateAndSendEmailReport(null, studyPlan);
+    public String generateDailyReport(@RequestParam Long userId) throws Exception {
+        StudyPlanResponse studyPlan = groqService.askGroq(userId);
+        reportGenerationService.generateAndSendEmailReport(studyPlan, userId);
         return "Daily report generated and sent successfully!";
     }   
 

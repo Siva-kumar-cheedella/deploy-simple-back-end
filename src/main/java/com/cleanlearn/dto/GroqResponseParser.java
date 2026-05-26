@@ -25,7 +25,7 @@ public class GroqResponseParser {
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public record RecommendedProblem(
-        String id,
+        Long id,
         String problemName,
         String difficulty,
         List<String> topic,

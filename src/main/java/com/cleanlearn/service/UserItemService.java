@@ -144,8 +144,28 @@ public class UserItemService {
         userItemRepository.save(userItem);
     }
 
-    // ========================GROQ RELATED METHODS - IGNORE =========================
-    public List<UserItemProblemDto> getUserItemsForGroq(Long userId) {
+    // ========================REPORT RELATED METHODS - IGNORE =========================
+    public List<UserItemProblemDto> getRecentUserItems(Long userId) {
         return userItemRepository.fetchRecentUserItems(userId, PageRequest.of(0, 10));
+    }
+
+    public List<UserItemProblemDto> getUnattemptedProblems(Long userId) {
+        return userItemRepository.fetchUnattemptedProblems(userId);
+    }
+
+    public List<String> getPendingRevisionsForToday(Long userId) {
+        return userItemRepository.fetchPendingProblemsForToday(userId);
+    }
+
+    public void updateFaDateForProblem(Long userId, Long refId) {
+        userItemRepository.findByUserIdAndRefId(userId, refId).ifPresent(userItem -> {
+            
+            userItem.setFaDate(LocalDateTime.now());
+            userItem.setUpdatedDate(LocalDateTime.now());
+            userItem.setFaStatus(constants.PENDING_STATUS);
+            userItem.setUpdatedBy("SYSTEM");
+
+            userItemRepository.save(userItem);
+        });
     }
 }

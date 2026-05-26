@@ -25,7 +25,25 @@ public interface UserItemRepository extends JpaRepository<UserItem, Long> {
 
     @Query("SELECT new com.cleanlearn.dto.UserItemProblemDto(ui, p) " +
             "FROM UserItem ui LEFT JOIN Problem p ON ui.refId = p.problemId " +
-            "WHERE ui.userId = :userId AND ui.itemType = 'DSA' ORDER BY ui.faDate DESC NULLS LAST")
+            "WHERE ui.userId = :userId AND ui.itemType = 'DSA' AND ui.faDate IS NOT NULL ORDER BY ui.faDate DESC NULLS LAST")
     List<UserItemProblemDto> fetchRecentUserItems(@Param("userId") Long userId,Pageable pageable);
 
+    @Query("SELECT new com.cleanlearn.dto.UserItemProblemDto(ui, p) " +
+            "FROM UserItem ui LEFT JOIN Problem p ON ui.refId = p.problemId " +
+            "WHERE ui.userId = :userId AND ui.itemType = 'DSA' AND ui.faDate IS NULL")
+    List<UserItemProblemDto> fetchUnattemptedProblems(@Param("userId") Long userId);
+
+    @Query("SELECT p.problemDesc " +
+        "FROM UserItem ui JOIN Problem p ON ui.refId = p.problemId " +
+        "WHERE ui.userId = :userId " +
+        "AND ui.itemType = 'DSA' " +
+        "AND ui.status='A' " +
+        "AND (" +
+        "    (ui.faDate <= CURRENT_DATE AND (ui.faStatus != 'COMPLETED' OR ui.faStatus IS NULL)) " +
+        "    OR (ui.r1Date <= CURRENT_DATE AND (ui.r1Status != 'COMPLETED' OR ui.r1Status IS NULL)) " +
+        "    OR (ui.r2Date <= CURRENT_DATE AND (ui.r2Status != 'COMPLETED' OR ui.r2Status IS NULL))" +
+        ")")
+    List<String> fetchPendingProblemsForToday(@Param("userId") Long userId);
+
+    Optional<UserItem> findByUserIdAndRefId(Long userId, Long refId);
 }

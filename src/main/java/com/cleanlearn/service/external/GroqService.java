@@ -23,8 +23,8 @@ public class GroqService {
     private final RestClient restClient;
     private final UserItemService userItemService;
 
-    public StudyPlanResponse askGroq() {
-        String refinedPrompt = refinePrompt(Prompts.GROQ_SYSTEM_PROMPT);
+    public StudyPlanResponse askGroq(Long userId) {
+        String refinedPrompt = refinePrompt(Prompts.GROQ_SYSTEM_PROMPT, userId);
         GroqRequest request = new GroqRequest(
                 "llama-3.1-8b-instant",
                 List.of(new Message("user", refinedPrompt)),
@@ -61,11 +61,11 @@ public class GroqService {
 
     }
 
-    private String refinePrompt(String prompt) {
+    private String refinePrompt(String prompt, Long userId) {
         
         //fetch the poblems that are solved in the last 7 days and append to the         
         prompt+= "\n\nHere are some of the problems I have solved recently:\n";
-        for (var item : userItemService.getUserItemsForGroq(2L)) {
+        for (var item : userItemService.getRecentUserItems(userId)) {
             prompt += "\n\nRecently Solved Problem: " + item.getProblem().getProblemDesc() + 
                         "\nLink: " + item.getProblem().getProblemLink() + 
                         "\nDifficulty: " + item.getProblem().getLevel();
@@ -73,14 +73,14 @@ public class GroqService {
 
         // fetch the pending problesm from the database and append to the promptproblem
         prompt += "\n\nHere are some of the problems I have pending:\n";
-        for (var item : userItemService.getUserItemsForGroq(2L)) {
+        for (var item : userItemService.getUnattemptedProblems(userId)) {
             prompt += "\n\nPending Problem: " + item.getProblem().getProblemDesc() +
-                        "\nProblemId: " + item.getProblem().getProblemId() +
+                        "\nId: " + item.getProblem().getProblemId() +
                       "\nLink: " + item.getProblem().getProblemLink() +
                       "\nDifficulty: " + item.getProblem().getLevel();
         }
 
-        prompt += "\n\nBased on the above information, suggest me the next best problems to solve from Striver's Blind 75 sheet and also, the problem should must be selected only from the pending problems and should must include the problemId in the response so that I can track it in my database \n*****DO NEVER MAP PROBLEM IDS TO PROBLEM NAMES INCORRECTLY, I SAY NEVER MEANS NEVER, DOUBLE CHECK AND RESPOND*****.";
+        prompt += "\n\nBased on the above information, suggest me the next best problems to solve from Striver's Blind 75 sheet and also, the problem should must be selected only from the pending problems and should must include the Id in the response so that I can track it in my database \n*****DO NEVER MAP PROBLEM IDS TO PROBLEM NAMES INCORRECTLY, I SAY NEVER MEANS NEVER, DOUBLE CHECK AND RESPOND*****.";
 
         return prompt;
     }
