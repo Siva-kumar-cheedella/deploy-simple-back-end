@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.List;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserItemRepository extends JpaRepository<UserItem, Long> {
@@ -46,4 +48,46 @@ public interface UserItemRepository extends JpaRepository<UserItem, Long> {
     List<String> fetchPendingProblemsForToday(@Param("userId") Long userId);
 
     Optional<UserItem> findByUserIdAndRefId(Long userId, Long refId);
+
+    @Query(
+        "SELECT ui FROM UserItem ui WHERE ui.userId = :userId AND (" +
+        "    (ui.faStatus = 'PENDING' AND ui.faDate < CURRENT_DATE) " +
+        "    OR (ui.r1Status = 'PENDING' AND ui.r1Date < CURRENT_DATE) " +
+        "    OR (ui.r2Status = 'PENDING' AND ui.r2Date < CURRENT_DATE) " +
+        ")"
+    )
+    List<UserItem> fetchMissedDeadlineProblems(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE "userItem"
+        SET
+            "FA_date" = CASE
+                WHEN "FA_Status" = 'PENDING'
+                THEN "FA_date" + INTERVAL '1 day'
+                ELSE "FA_date"
+            END,
+            "R1_date" = CASE
+                WHEN "R1_Status" = 'PENDING'
+                THEN "R1_date" + INTERVAL '1 day'
+                ELSE "R1_date"
+            END,
+            "R2_date" = CASE
+                WHEN "R2_Status" = 'PENDING'
+                THEN "R2_date" + INTERVAL '1 day'
+                ELSE "R2_date"
+            END,
+            "updatedBy"='SYSTEM',
+            "updatedDate"=CURRENT_TIMESTAMP
+        WHERE
+            (
+                "FA_Status" = 'PENDING'
+                OR "R1_Status" = 'PENDING'
+                OR "R2_Status" = 'PENDING'
+            )
+            AND "userId" = :userId
+        """,
+        nativeQuery = true)
+    int updateDatesForUserItems(@Param("userId") Long userId);
 }

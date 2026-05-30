@@ -110,6 +110,7 @@ public class UserItemService {
         userItem.setUpdatedDate(LocalDateTime.now());
 
         userItem.setR1Date(LocalDateTime.now().plusDays(3)); 
+        userItem.setR1Status(constants.PENDING_STATUS);
 
         userItemRepository.save(userItem);
     }
@@ -126,6 +127,7 @@ public class UserItemService {
         userItem.setUpdatedDate(LocalDateTime.now());
 
         userItem.setR2Date(LocalDateTime.now().plusDays(7));
+        userItem.setR2Status(constants.PENDING_STATUS);
 
         userItemRepository.save(userItem);
     }
@@ -168,4 +170,15 @@ public class UserItemService {
             userItemRepository.save(userItem);
         });
     }
+
+    public Boolean anyDeadlineMissedProblems(Long userId) {
+        List<UserItem> missedDeadlineProblems = userItemRepository.fetchMissedDeadlineProblems(userId);
+        log.error("Missed deadline problems for user with id {}: {}", userId, missedDeadlineProblems);
+        return !missedDeadlineProblems.isEmpty();
+    }
+
+    public void updateDatesForUserItems(Long userId) {
+        userItemRepository.updateDatesForUserItems(userId);
+    }
+
 }
